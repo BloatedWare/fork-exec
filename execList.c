@@ -16,6 +16,7 @@ int status = UNASSIGNED_STATUS;
 
 typedef struct proc_node{
     int pid;
+    const char* name;//we will point to string literals so this is "safe"
     struct proc_node* next;
 } proc_node;
 
@@ -105,6 +106,7 @@ proc_node* createNode(const char* path) {
             }
             
             node->pid = children_pids[fork_count-1];//cuz we incremented
+            node->name = path;
             node->next = NULL;
 
             return node;
@@ -128,8 +130,8 @@ void display_linkedlist(proc_node* list) {
     }
 
     while(list->next != NULL) {
-        printf("%d -> ", list->pid);
+        printf("[name: %s | pid:%d] -> ", list->name, list->pid);
         list = list->next;
     }
-    printf("%d -> %p\n", list->pid, list->next);
+    printf("[name: %s | pid:%d] -> %p\n", list->name, list->pid, list->next);
 }
