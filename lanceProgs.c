@@ -8,20 +8,23 @@
 
 #define FAILED_FORK -100
 #define FAILED_EXEC -101
-#define INSUFFICENT_NBR_OF_ARGS -102
+#define INSUFFICIENT_ARGS -102
 #define NOT_A_NUMBER -103
 #define ZERO_OR_NEGATIVE -104
+#define FAILED_MALLOC -105
 
 bool isNumber(const char* str);
 
+
+//MARK:MAIN
 int main(int argc, char** argv) {
 
     int* children_pids = NULL;
-    int child_cursor = 0;
+    int fork_count = 0;
     int n;
     if (argc < 3) {
         printf("lancer <number of arguments> PATHS...\n");
-        exit(INSUFFICENT_NBR_OF_ARGS);
+        exit(INSUFFICIENT_ARGS);
     }
 
     if (!isNumber(argv[1])) {
@@ -36,15 +39,19 @@ int main(int argc, char** argv) {
     }
 
     children_pids = (int*)malloc(sizeof(int)*n*(argc-2));//argc-2 == number of apps
+    if (children_pids == NULL) {
+        perror("malloc");
+        exit(FAILED_MALLOC);
+    }
 
     for (int i = 2; i < argc; i++) {
         for (int j = 0; j < n; j++) {
-            children_pids[child_cursor] = fork();
-            switch (children_pids[child_cursor]) {
+            children_pids[fork_count] = fork();
+            switch (children_pids[fork_count]) {
                 case -1:
                     perror("fork");
                     
-                    for (int k = 0; k < child_cursor; k++) {//0 -> before last failed child
+                    for (int k = 0; k < fork_count; k++) {//0 -> before last failed child
                         kill(children_pids[i], SIGKILL);
                     }
                     free(children_pids);
@@ -58,7 +65,7 @@ int main(int argc, char** argv) {
                 default:
                     //je suis le parent
                     //only reaches here when the fork succeeds
-                    child_cursor++;
+                    fork_count++;
                     break;
             }
 
