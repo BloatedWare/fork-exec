@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
     proc_node *head = NULL, *curr = NULL;
 
     if (argc < 2) {
-        printf("Insufficient argument count!\nhelp: execList FILE...\n");
+        printf("Insufficient argument count!\nhelp: %s FILE...\n",argv[0]);
         exit(INSUFFICIENT_ARGS);
     }
 
@@ -42,9 +42,8 @@ int main(int argc, char** argv) {
     wait(&status);
     if(status == FAILED_EXEC) {
         perror("exec");
-        cleanup();
+        cleanup();//it itself frees the array, i m lucky no segfault happened
         free_linkedlist(head);
-        free(children_pids);
         exit(FAILED_EXEC);
     }
     curr = head;
@@ -57,7 +56,6 @@ int main(int argc, char** argv) {
                 perror("exec");
                 cleanup();
                 free_linkedlist(head);
-                free(children_pids);
                 exit(FAILED_EXEC);
         }
         curr = curr->next;
@@ -66,7 +64,7 @@ int main(int argc, char** argv) {
     display_linkedlist(head);
 
     free_linkedlist(head);
-    free(children_pids);
+    cleanup();//does both kill the child processes and free pid array
     return 0;
 }
 
@@ -133,5 +131,6 @@ void display_linkedlist(proc_node* list) {
         printf("[name: %s | pid:%d] -> ", list->name, list->pid);
         list = list->next;
     }
-    printf("[name: %s | pid:%d] -> %p\n", list->name, list->pid, list->next);
+    printf("[name: %s | pid:%d]\n", list->name, list->pid);
+    //they thought (nil) was a bug -_- so i removed it
 }

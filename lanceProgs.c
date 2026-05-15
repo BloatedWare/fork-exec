@@ -23,12 +23,12 @@ int main(int argc, char** argv) {
     int fork_count = 0;
     int n;
     if (argc < 3) {
-        printf("lancer <number of arguments> PATHS...\n");
+        printf("%s <number of arguments> PATHS...\n", argv[0]);
         exit(INSUFFICIENT_ARGS);
     }
 
     if (!isNumber(argv[1])) {
-        printf("second argument must be an int!\n");
+        printf("1st argument must be a positive int!\n");
         exit(NOT_A_NUMBER);
     }
 
@@ -79,6 +79,7 @@ int main(int argc, char** argv) {
 }
 
 bool isNumber(const char* str) {
+    if(str == NULL) return false;//forgot this edge case
     while(*str == ' ')str++;//skip white space
     
     switch(*str) {//skip the sign
