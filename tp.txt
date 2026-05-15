@@ -1,0 +1,13 @@
+creer un progrmme .c dans workstation 
+qui permet de recuperer 
+la ligne de commande contenant plusieurs 
+programme et de creer pour chaque
+ programme 100 copies 
+ ( exp : lancer App N ls gedit)
+
+créer un programme qui lit une liste 
+d'application et 
+de créer une liste chainée pour chaque
+ application 
+lancer puis détruit cette liste chainée
+ à la fin
