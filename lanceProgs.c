@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <stdbool.h>
+#include <signal.h>
+
 
 #define FAILED_FORK -100
 #define FAILED_EXEC -101
@@ -14,6 +16,8 @@ bool isNumber(const char* str);
 
 int main(int argc, char** argv) {
 
+    int* children_pids = NULL;
+    int child_cursor = 0;
     int n;
     if (argc < 3) {
         printf("lancer <number of arguments> PATHS...\n");
@@ -31,11 +35,19 @@ int main(int argc, char** argv) {
         exit(ZERO_OR_NEGATIVE);
     }
 
+    children_pids = (int*)malloc(sizeof(int)*n*(argc-2));//argc-2 == number of apps
+
     for (int i = 2; i < argc; i++) {
         for (int j = 0; j < n; j++) {
-            switch (fork()) {
+            children_pids[child_cursor] = fork();
+            switch (children_pids[child_cursor]) {
                 case -1:
                     perror("fork");
+                    
+                    for (int k = 0; k < child_cursor; k++) {//0 -> before last failed child
+                        kill(children_pids[i], SIGKILL);
+                    }
+                    free(children_pids);
                     exit(FAILED_FORK);
                     break;
                 case 0:   
@@ -43,7 +55,11 @@ int main(int argc, char** argv) {
                     perror("exec");
                     exit(FAILED_EXEC);
                     break;
-                //je suis le parent
+                default:
+                    //je suis le parent
+                    //only reaches here when the fork succeeds
+                    child_cursor++;
+                    break;
             }
 
         }
@@ -51,6 +67,7 @@ int main(int argc, char** argv) {
 
     while(wait(NULL) > 0);//retourn -1 lorsqu'il n'y a pas de processus enfants
 
+    free(children_pids);
     return 0;
 }
 
